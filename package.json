@@ -1,0 +1,56 @@
+{
+  "name": "pdf-bucket-tool",
+  "version": "0.1.0",
+  "description": "Pixel-based flood fill (paint bucket) editing for PDFs with non-destructive overlay layers and hybrid PDF export",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "pdf",
+    "flood-fill",
+    "paint-bucket",
+    "pdf-editor",
+    "coloring-book"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aless00san/pdf-bucket-tool.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "jspdf": "^2.5.2",
+    "pdfjs-dist": "^4.9.155"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}
