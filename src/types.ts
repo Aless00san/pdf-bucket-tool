@@ -67,3 +67,10 @@ export interface FillResult {
   /** Number of pixels that were filled */
   pixelsFilled: number
 }
+
+export interface MagnifierOptions {
+  /** Diameter of the magnifier loupe in CSS pixels (default: 150) */
+  size?: number
+  /** Magnification factor (default: 3) */
+  zoom?: number
+}

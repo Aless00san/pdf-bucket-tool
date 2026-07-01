@@ -63,6 +63,43 @@ Low-level scanline flood fill operating on `RGBAData` objects. Configurable tole
 
 Export a hybrid PDF preserving text as a selectable layer underneath the composited page image. Returns a `Uint8Array`.
 
+### `Magnifier`
+
+A ready-to-use magnifier loupe for precise paint placement. Appends a circular fixed-position loupe to the page body on construction.
+
+```ts
+import { Magnifier } from 'pdf-bucket-tool'
+
+const magnifier = new Magnifier({ zoom: 4 })
+
+// Attach to the canvas the user is painting on
+magnifier.attachTo(canvasElement)
+
+// Call on mousemove to update position and content
+canvas.addEventListener('mousemove', (e) => magnifier.update(e))
+canvas.addEventListener('mouseleave', () => magnifier.hide())
+
+// Re-draw after the canvas content changes (e.g., after a flood fill)
+magnifier.refresh()
+
+// Toggle on/off
+magnifier.enabled = true
+
+// Change zoom at runtime
+magnifier.zoom = 5
+```
+
+| Property / Method | Description |
+|---|---|
+| `new Magnifier({ size?, zoom? })` | Create a magnifier. `size` is the loupe diameter in CSS px (default 150), `zoom` is the magnification factor (default 3) |
+| `enabled` | Get/set whether the magnifier is active |
+| `zoom` | Get/set the zoom level (min 1) |
+| `attachTo(source)` | Set the source canvas to read pixels from |
+| `update(event)` | Call on `mousemove` — repositions and redraws the loupe |
+| `refresh()` | Re-draw at the last known cursor position (use after canvas content changes) |
+| `show()` / `hide()` | Manually show or hide the loupe |
+| `destroy()` | Remove the loupe from the DOM and clean up |
+
 ## Browser Requirements
 
 This library requires the **Canvas API** (`HTMLCanvasElement`) which is only available in browsers. Node.js usage is limited to:
@@ -80,7 +117,7 @@ You must set the pdf.js worker source before loading a PDF:
 import { GlobalWorkerOptions } from 'pdfjs-dist'
 
 GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.9.155/pdf.worker.min.mjs'
-// Or point to your local copy:
+// Or point to a local copy:
 // GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 ```
 
@@ -109,7 +146,37 @@ interface ExportOptions {
   imageFormat?: 'image/png' | 'image/jpeg'
   imageQuality?: number  // 0–1, default: 0.92
 }
+
+interface MagnifierOptions {
+  size?: number    // loupe diameter in CSS px, default: 150
+  zoom?: number    // magnification factor, default: 3
+}
 ```
+
+## Demo App
+
+The repository includes a Vue 3 demo application in `demo/`. Run it with:
+
+```bash
+cd demo
+npm install
+npm run dev
+```
+
+The demo provides an interactive paint bucket interface with the following controls:
+
+| Control | Description |
+|---|---|
+| Open PDF / Load Demo | Load a PDF or use the built-in demo page |
+| Fill color | Pick the fill color |
+| Tolerance (0–255) | Adjust the color-matching sensitivity |
+| Magnifier | Toggle a circular magnifier loupe centered on the cursor |
+| Zoom (2×–10×) | Adjust the magnification level (shown when magnifier is enabled) |
+| Export PDF | Download the colored PDF with preserved text layer |
+| Reset Page | Clear all fills on the current page |
+| Prev / Next | Navigate between pages |
+
+When enabled, the magnifier shows a 150px circular zoomed view of the area under the cursor with a crosshair, hiding the browser cursor for precise placement.
 
 ## License
 

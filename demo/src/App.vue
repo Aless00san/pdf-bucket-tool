@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import * as pdfjsLib from 'pdfjs-dist'
-import { PDFDocument, PageLayers, exportPDF } from 'pdf-bucket-tool'
+import { PDFDocument, PageLayers, exportPDF, Magnifier } from 'pdf-bucket-tool'
 import { jsPDF } from 'jspdf'
 
 const workerUrl = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).href
@@ -18,6 +18,12 @@ const pagesLayers = ref<Map<number, PageLayers>>(new Map())
 const currentPageIndex = ref(0)
 const totalPages = ref(0)
 const currentPageDisplay = computed(() => currentPageIndex.value + 1)
+
+const magnifierEnabled = ref(false)
+const magnifierZoom = ref(3)
+const magnifier = new Magnifier()
+watch(magnifierEnabled, v => magnifier.enabled = v)
+watch(magnifierZoom, v => magnifier.zoom = v)
 
 function currentLayers(): PageLayers | null {
   return pagesLayers.value.get(currentPageIndex.value) ?? null
@@ -130,6 +136,7 @@ function onCanvasClick(e: MouseEvent) {
   const result = layers.floodFill(x, y, color.value, { tolerance: tolerance.value })
   status.value = `Filled ${result.pixelsFilled} pixels`
   displayPage()
+  magnifier.refresh()
 }
 
 async function handleExport() {
@@ -172,7 +179,19 @@ function resetPage() {
   }
 }
 
-onMounted(loadDemo)
+function onCanvasMouseMove(e: MouseEvent) {
+  if (!canvasRef.value) return
+  magnifier.update(e)
+}
+
+function onCanvasMouseLeave() {
+  magnifier.hide()
+}
+
+onMounted(async () => {
+  await loadDemo()
+  if (canvasRef.value) magnifier.attachTo(canvasRef.value)
+})
 </script>
 
 <template>
@@ -194,6 +213,15 @@ onMounted(loadDemo)
         <input type="range" min="0" max="255" v-model.number="tolerance" style="vertical-align: middle" />
         {{ tolerance }}
       </label>
+      <label>
+        <input type="checkbox" v-model="magnifierEnabled" />
+        Magnifier
+      </label>
+      <label v-if="magnifierEnabled" style="display: inline-flex; align-items: center; gap: 4px">
+        Zoom:
+        <input type="range" min="2" max="10" step="0.5" v-model.number="magnifierZoom" style="vertical-align: middle; width: 80px" />
+        {{ magnifierZoom }}×
+      </label>
       <button @click="handleExport">Export PDF</button>
       <button @click="resetPage">Reset Page</button>
     </div>
@@ -203,6 +231,6 @@ onMounted(loadDemo)
       <button :disabled="currentPageIndex >= totalPages - 1" @click="goToPage(1)">Next</button>
     </div>
     <div style="margin-bottom: 8px; font-size: 14px; color: #555">{{ status }}</div>
-    <canvas ref="canvasRef" @click="onCanvasClick" style="border: 1px solid #ccc; max-width: 100%; cursor: crosshair" />
+    <canvas ref="canvasRef" @click="onCanvasClick" @mousemove="onCanvasMouseMove" @mouseleave="onCanvasMouseLeave" :style="{ border: '1px solid #ccc', display: 'block', maxWidth: '100%', cursor: magnifierEnabled ? 'none' : 'crosshair' }" />
   </div>
 </template>
