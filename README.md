@@ -1,6 +1,6 @@
 # pdf-bucket-tool
 
-Pixel-based flood fill (paint bucket) editing for PDFs with non-destructive overlay layers and hybrid PDF export that preserves text selectability.
+Pixel-based flood fill (paint bucket) editing for PDFs with non-destructive overlay layers and hybrid PDF export that preserves text selectability, easy to use, ready to start painting on install out of the box
 
 ## Installation
 
